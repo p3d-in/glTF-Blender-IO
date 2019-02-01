@@ -1,15 +1,18 @@
 version: 2
 jobs:
   build:
-    machine:
-      image: circleci/classic:edge
+    docker:
+      - image: p3din/gltf-blender-io
     steps:
       - checkout
       - run:
-          name: Build docker
-          command: docker-compose build
+          name: Prepare Tests
+          command: cd tests && yarn install
       - run:
           name: Run tests
-          command: docker-compose up
+          command: |
+            mkdir -p /out
+            cd tests
+            OUT_PREFIX=/out yarn test-bail --reporter-options reportDir=/out/mochawesome
       - store_artifacts:
-          path: test_out
+          path: /out
