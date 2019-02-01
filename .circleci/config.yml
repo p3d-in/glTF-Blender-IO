@@ -1,37 +1,15 @@
 version: 2
 jobs:
   build:
-    docker:
-      - image: ux3d/gltf-blender-io
+    machine:
+      image: circleci/classic:edge
     steps:
       - checkout
       - run:
-          name: Install Blender Plugin (2.79)
-          command: rm -r /opt/blender279b/2.79/scripts/addons/io_scene_gltf2 && cp -r addons/io_scene_gltf2 /opt/blender279b/2.79/scripts/addons/io_scene_gltf2
+          name: Build docker
+          command: docker-compose build
       - run:
-          name: Install Blender Plugin (2.80)
-          command: rm -r /opt/blender28/2.80/scripts/addons/io_scene_gltf2 && cp -r addons/io_scene_gltf2 /opt/blender28/2.80/scripts/addons/io_scene_gltf2
-      - run:
-          name: Prepare Tests
-          command: cd tests && npm install
-      - run:
-          name: Run Tests
-          command: cd tests && npm test
-      - run:
-          name: Store Results
-          when: always
-          command: cp -r tests/mochawesome-report /tmp/report
-      - run:
-          name: Store Scenes
-          when: always
-          command: cp -r tests/scenes /tmp/scenes
-      - run:
-          name: Store glTFs
-          when: always
-          command: cp -r tests/roundtrip /tmp/roundtrip
+          name: Run tests
+          command: docker-compose up
       - store_artifacts:
-          path: /tmp/report
-      - store_artifacts:
-          path: /tmp/scenes
-      - store_artifacts:
-          path: /tmp/roundtrip
+          path: test_out
