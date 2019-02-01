@@ -6,6 +6,12 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install Blender Plugin (2.79)
+          command: rm -r /opt/blender279/2.79/scripts/addons/io_scene_gltf2 && cp -r addons/io_scene_gltf2 /opt/blender279/2.79/scripts/addons/io_scene_gltf2
+      - run:
+          name: Install Blender Plugin (2.80)
+          command: rm -r /opt/blender280/2.80/scripts/addons/io_scene_gltf2 && cp -r addons/io_scene_gltf2 /opt/blender280/2.80/scripts/addons/io_scene_gltf2
+      - run:
           name: Prepare Tests
           command: cd tests && yarn install
       - run:
