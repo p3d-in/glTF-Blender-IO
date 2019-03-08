@@ -1,11 +1,42 @@
-version: 2.1    
+version: 2.1
 jobs:
   build:
     docker:
-      - image: p3din/gltf-blender-io
+      - image: circleci/node:8-stretch
     parallelism: 4
+    environment:
+      TEST_FILTERS: >
+        General\|blender279b_export
+        blender28_export
+        blender279b_roundtrip
+        blender28_roundtrip
     steps:
       - checkout
+      - run:
+          name: Install Blender
+          commands: |
+            export DEBIAN_FRONTEND=noninteractive
+            apt -q update && apt install --no-install-recommends -y -q \
+              libglu1-mesa \
+              libxi6
+            FILTER=${TEST_FILTERS[$CIRCLE_NODE_INDEX]}
+            if [[ $FILTER =~ blender279 ]]; then
+              echo "Installing Blender 2.79"
+              BLENDER279_URL=https://download.blender.org/release/Blender2.79/blender-2.79b-linux-glibc219-x86_64.tar.bz2
+              mkdir /opt/blender279
+              curl -SL "$BLENDER279_URL" | \
+                tar -jx -C /opt/blender279 --strip-components=1
+              ln -s /opt/blender279/blender /usr/local/bin/blender279b
+            fi
+            if [[ $FILTER =~ blender28 ]]; then
+              echo "Installing Blender 2.80"
+              BLENDER280_URL="https://builder.blender.org$(curl -s https://builder.blender.org/download/ | \
+                grep -oe '[^\"]*blender-2\.80[^\"]*linux[^\"]*-x86_64[^\"]*')"; \
+              mkdir /opt/blender280
+              curl -SL "$BLENDER280_URL" | \
+                tar -jx -C /opt/blender280 --strip-components=1
+              ln -s /opt/blender280/blender /usr/local/bin/blender28
+            fi
       - run:
           name: Setup Tests
           command: |
@@ -18,7 +49,6 @@ jobs:
           name: Run Tests
           command: |
             cd tests
-            export FILTERS=(General\|blender279b_export blender28_export blender279b_roundtrip blender28_roundtrip)
-            OUT_PREFIX=/out yarn test-bail --reporter-options reportDir=/out/mochawesome -g ${FILTERS[$CIRCLE_NODE_INDEX ]}
+            OUT_PREFIX=/out yarn test-bail --reporter-options reportDir=/out/mochawesome -g ${TEST_FILTERS[$CIRCLE_NODE_INDEX ]}
       - store_artifacts:
           path: /out
