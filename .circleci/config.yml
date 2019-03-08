@@ -15,12 +15,9 @@ jobs:
       - run:
           name: Install Blender
           command: |
-            echo "TEST_FILTERS: '$TEST_FILTERS'"
-            FILTER=${TEST_FILTERS[$CIRCLE_NODE_INDEX]}
+            FILTERS=($TEST_FILTERS)
+            FILTER=${FILTERS[$CIRCLE_NODE_INDEX]}
             echo "FILTER: '$FILTER'"
-            TEST_FILTERS=($TEST_FILTERS)
-            FILTER=${TEST_FILTERS[$CIRCLE_NODE_INDEX]}
-            echo "FILTER2: '$FILTER'"
             export DEBIAN_FRONTEND=noninteractive
             apt -q update && apt install --no-install-recommends -y -q \
               libglu1-mesa \
@@ -45,15 +42,25 @@ jobs:
       - run:
           name: Setup Tests
           command: |
-            rm -rf /opt/blender279/2.79/scripts/addons/io_scene_gltf2 && cp -r addons/io_scene_gltf2 /opt/blender279/2.79/scripts/addons/io_scene_gltf2
-            rm -rf /opt/blender280/2.80/scripts/addons/io_scene_gltf2 && cp -r addons/io_scene_gltf2 /opt/blender280/2.80/scripts/addons/io_scene_gltf2
+            FILTERS=($TEST_FILTERS)
+            FILTER=${FILTERS[$CIRCLE_NODE_INDEX]}
+            if [[ $FILTER =~ blender279 ]]; then
+              rm -rf /opt/blender279/2.79/scripts/addons/io_scene_gltf2
+              cp -r addons/io_scene_gltf2 /opt/blender279/2.79/scripts/addons/io_scene_gltf2
+            fi
+            if [[ $FILTER =~ blender28 ]]; then
+              rm -rf /opt/blender280/2.80/scripts/addons/io_scene_gltf2
+              cp -r addons/io_scene_gltf2 /opt/blender280/2.80/scripts/addons/io_scene_gltf2
+            fi
             cd tests
             yarn install
             mkdir -p /out
       - run:
           name: Run Tests
           command: |
+            FILTERS=($TEST_FILTERS)
+            FILTER=${FILTERS[$CIRCLE_NODE_INDEX]}
             cd tests
-            OUT_PREFIX=/out yarn test-bail --reporter-options reportDir=/out/mochawesome -g ${TEST_FILTERS[$CIRCLE_NODE_INDEX]}
+            OUT_PREFIX=/out yarn test-bail --reporter-options reportDir=/out/mochawesome -g $FILTER
       - store_artifacts:
           path: /out
