@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: circleci/node:8-stretch
+      - image: node:8-stretch
     parallelism: 4
     environment:
       TEST_FILTERS: >
