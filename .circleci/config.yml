@@ -5,7 +5,7 @@ jobs:
       - image: node:8-stretch
     parallelism: 4
     environment:
-      TEST_FILTERS: >
+      TEST_FILTERS: >-
         General\|blender279b_export
         blender28_export
         blender279b_roundtrip
@@ -15,11 +15,12 @@ jobs:
       - run:
           name: Install Blender
           command: |
+            FILTER=${TEST_FILTERS[$CIRCLE_NODE_INDEX]}
+            echo $FILTER
             export DEBIAN_FRONTEND=noninteractive
             apt -q update && apt install --no-install-recommends -y -q \
               libglu1-mesa \
               libxi6
-            FILTER=${TEST_FILTERS[$CIRCLE_NODE_INDEX]}
             if [[ $FILTER =~ blender279 ]]; then
               echo "Installing Blender 2.79"
               BLENDER279_URL=https://download.blender.org/release/Blender2.79/blender-2.79b-linux-glibc219-x86_64.tar.bz2
@@ -49,6 +50,6 @@ jobs:
           name: Run Tests
           command: |
             cd tests
-            OUT_PREFIX=/out yarn test-bail --reporter-options reportDir=/out/mochawesome -g ${TEST_FILTERS[$CIRCLE_NODE_INDEX ]}
+            OUT_PREFIX=/out yarn test-bail --reporter-options reportDir=/out/mochawesome -g ${TEST_FILTERS[$CIRCLE_NODE_INDEX]}
       - store_artifacts:
           path: /out
