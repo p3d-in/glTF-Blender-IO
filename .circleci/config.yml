@@ -33,8 +33,9 @@ jobs:
             if [[ $FILTER =~ blender28 ]]; then
               echo "Installing Blender 2.80"
               BLENDER280_URL="https://builder.blender.org$(curl -s https://builder.blender.org/download/ | \
-                grep -oe '[^\"]*blender-2\.80[^\"]*linux[^\"]*-x86_64[^\"]*')"; \
+                grep -oe '[^\"]*blender-2\.80[^\"]*linux[^\"]*-x86_64[^\"]*')"
               mkdir /opt/blender280
+              echo "Downloading from: $BLENDER280_URL"
               curl -SL "$BLENDER280_URL" | \
                 tar -jx -C /opt/blender280 --strip-components=1
               ln -s /opt/blender280/blender /usr/local/bin/blender28
