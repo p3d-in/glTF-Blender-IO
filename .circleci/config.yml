@@ -15,8 +15,12 @@ jobs:
       - run:
           name: Install Blender
           command: |
+            echo "TEST_FILTERS: '$TEST_FILTERS'"
             FILTER=${TEST_FILTERS[$CIRCLE_NODE_INDEX]}
-            echo $FILTER
+            echo "FILTER: '$FILTER'"
+            TEST_FILTERS=($TEST_FILTERS)
+            FILTER=${TEST_FILTERS[$CIRCLE_NODE_INDEX]}
+            echo "FILTER2: '$FILTER'"
             export DEBIAN_FRONTEND=noninteractive
             apt -q update && apt install --no-install-recommends -y -q \
               libglu1-mesa \
